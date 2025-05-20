@@ -2,9 +2,9 @@ name : Node.js CI/CD Pipeline
 
 on: 
   push:
-    branchnes: [ main ]
+    branches: [ main ]
   pull_request:
-    branchnes: [ main ]
+    branches: [ main ]
 
 
 jobs:
@@ -19,16 +19,16 @@ jobs:
           node-version: '14'
 
       - name: Install Dependencies
-        uses: npm Install
+        run: npm Install
 
       - name: Run Tests
         run: echo "Skipping Tests"
 
       - name: Build Docker Image
-        uses: docker build -t node-hello .
+        run: docker build -t node-hello .
       
       - name: Save Docker Image
-        uses: docker save node-hello -o node-hello.tar
+        run: docker save node-hello -o node-hello.tar
 
       - name: Upload Docker Image
         uses: actions/upload-artifact@v2
