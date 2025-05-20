@@ -1,0 +1,61 @@
+name : Node.js CI/CD Pipeline
+
+on: 
+  push:
+    branchnes: [ main ]
+  pull_request:
+    branchnes: [ main ]
+
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Dependencies
+        uses: npm Install
+
+      - name: Run Tests
+        run: echo "Skipping Tests"
+
+      - name: Build Docker Image
+        uses: docker build -t node-hello .
+      
+      - name: Save Docker Image
+        uses: docker save node-hello -o node-hello.tar
+
+      - name: Upload Docker Image
+        uses: actions/upload-artifact@v2
+        with:
+          name: node-hello-image
+          path: node-hello.tar
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Download Docker Image
+        uses: actions/download-artifact@v2
+        with:
+          name: node-hello-image
+      - name: Install SSH keys
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.AWS_SSH_KEYS }}
+          known_hosts: ${{ secrets.AWS_KNOWN_HOSTS }}
+        
+      - name: Copy Image to EC2 and deploy
+        run: |
+          scp -o StrictHostKeyChecking=no node-hello.tar ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_IP }}:~/node-hello.tar
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_IP }} << 'EOF'
+          docker load -i node-hello.tar
+          docker stop node-hello-container || true
+          docker rm node-hello-container || true
+          docker run -d -p 80:3000 --name node-hello-container node-hello
+          EOF
