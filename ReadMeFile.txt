@@ -14,6 +14,9 @@ This project demonstrates a complete CI/CD pipeline using GitHub Actions to depl
    - Deploys to EC2 instance
 2. The EC2 instance runs the Docker container on port 80
 
+
+Note: the files ending with .docx and.txt files are ignored so that repeated deployment doesn't take place.
+
 Hence a complete CI/CD pipeline with deployment automation on EC2 instance.
 
 Access the live demo at: http://your-ec2-ip
