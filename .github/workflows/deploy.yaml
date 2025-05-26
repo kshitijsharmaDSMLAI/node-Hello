@@ -4,6 +4,7 @@ on:
   push:
     paths-ignore:
       - '**.docx'
+      - '**.txt'
     branches: [ master ]
   pull_request:
     branches: [ master ]
